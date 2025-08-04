@@ -37,5 +37,5 @@ class LSTMVAE(nn.Module):
     def forward(self, x):
         mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
-        x_reconstructed = self.decode(z)
-        return x_reconstructed, mu, logvar
+        x_recon = self.decode(z)
+        return x_recon, mu, logvar
