@@ -21,6 +21,7 @@ class LSTMVAE(nn.Module):
         h_n = h_n.squeeze(0)
         mu = self.to_mu(h_n)
         logvar = self.to_logvar(h_n)
+        return mu, logvar
         
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5*logvar)
@@ -34,7 +35,7 @@ class LSTMVAE(nn.Module):
         return out
     
     def forward(self, x):
-        mu, logvar = encode(x)
+        mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
         x_reconstructed = self.decode(z)
         return x_reconstructed, mu, logvar
