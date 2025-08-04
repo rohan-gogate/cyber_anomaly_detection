@@ -9,6 +9,7 @@ df = pd.read_csv(r'C:\Users\Rohan\Code\cyber_anomaly_detection\cyber_anomaly_det
 DROP_FEATURES = ['id']
 CAT_FEATURES = ['proto', 'state', 'service']
 LABEL_FEATURES = ['label', 'attack_cat']
+df = df[df['label'] == 0]  
 df.drop(columns=[col for col in DROP_FEATURES + LABEL_FEATURES if col in df.columns], inplace=True)
 NUM_FEATURES = [col for col in df.columns if col not in CAT_FEATURES]
 
@@ -24,5 +25,4 @@ scaler = StandardScaler()
 df[NUM_FEATURES] = scaler.fit_transform(df[NUM_FEATURES])
 joblib.dump(scaler, 'artifacts/scaler.joblib')
 
-print(f"Processed data shape: {df.shape}")
-print(df.head())
+df.to_csv('artifacts/preprocessed_training_data.csv', index=False)
