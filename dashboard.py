@@ -10,10 +10,10 @@ import torch.nn.functional as F
 
 window_size = 30
 input_dim = 65
+max_history = 300  
 st.set_page_config(layout="wide")
 
-
-st.title("Live Cybersecurity Anomaly Detection")
+st.title("🚨 Live Cybersecurity Anomaly Detection")
 
 @st.cache_resource
 def load_artifacts():
@@ -28,10 +28,9 @@ def load_artifacts():
 
 model, encoder, scaler, expected_columns = load_artifacts()
 
-
 @st.cache_data
 def load_test_data():
-    df = pd.read_csv("data/raw/UNSW_NB15_testing-set.csv")
+    df = pd.read_csv("data/raw/UNSW_NB15_testing-set.csv").iloc[:5000]
     labels = df['label'].values
     df.drop(columns=['id', 'attack_cat', 'label'], inplace=True)
 
@@ -52,7 +51,6 @@ def load_test_data():
 
 df_full, label_full = load_test_data()
 
-
 if 'start_idx' not in st.session_state:
     st.session_state.start_idx = 0
 if 'history_scores' not in st.session_state:
@@ -65,8 +63,9 @@ plot_placeholder = st.empty()
 
 threshold = st.sidebar.slider("Anomaly Threshold", 0.0, 50.0, 2.5, step=0.1)
 
-
-st.sidebar.button("Reset Stream", on_click=lambda: st.session_state.update(start_idx=0, history_scores=[], history_preds=[], history_labels=[]))
+st.sidebar.button("Reset Stream", on_click=lambda: st.session_state.update(
+    start_idx=0, history_scores=[], history_preds=[], history_labels=[]
+))
 
 for i in range(st.session_state.start_idx, len(df_full) - window_size + 1):
     current_window = df_full.iloc[i:i+window_size].to_numpy()
@@ -77,24 +76,28 @@ for i in range(st.session_state.start_idx, len(df_full) - window_size + 1):
         recon_error = F.mse_loss(x_recon, X_tensor, reduction='none')
         score = recon_error.reshape(1, -1).mean(dim=1).item()
 
-    label = label_full[i + window_size - 1]  
+    label = label_full[i + window_size - 1]
     predicted = score > threshold
 
     st.session_state.history_scores.append(score)
     st.session_state.history_preds.append(predicted)
     st.session_state.history_labels.append(label)
 
-    fig, ax = plt.subplots(figsize=(10, 3))
-    ax.bar(0, score, color='red' if predicted else 'blue')
+    st.session_state.history_scores = st.session_state.history_scores[-max_history:]
+    st.session_state.history_preds = st.session_state.history_preds[-max_history:]
+    st.session_state.history_labels = st.session_state.history_labels[-max_history:]
+
+    fig, ax = plt.subplots(figsize=(8, 2))
+    ax.bar(0, score, color='red' if predicted else 'blue', linewidth=1)
     ax.axhline(y=threshold, color='gray', linestyle='--', label='Threshold')
     ax.set_ylim([0, 10])
-    ax.set_title(f"Live Score: {score:.4f} | Predicted: {int(predicted)} | True: {label}")
+    ax.set_title(f"Live Score: {score:.4f} | Predicted: {int(predicted)} | True: {label}", fontsize=10)
     ax.set_xticks([])
-    ax.legend()
+    ax.legend(fontsize=8)
     score_placeholder.pyplot(fig)
 
-    fig2, ax2 = plt.subplots(figsize=(10, 3))
-    ax2.plot(st.session_state.history_scores, label='Anomaly Score')
+    fig2, ax2 = plt.subplots(figsize=(8, 2))
+    ax2.plot(st.session_state.history_scores, label='Anomaly Score', linewidth=1)
     ax2.axhline(y=threshold, color='gray', linestyle='--', label='Threshold')
     ax2.fill_between(
         range(len(st.session_state.history_scores)),
@@ -102,10 +105,10 @@ for i in range(st.session_state.start_idx, len(df_full) - window_size + 1):
         where=st.session_state.history_preds,
         color='red', alpha=0.3, label='Anomaly'
     )
-    ax2.set_title("Score History")
-    ax2.set_xlabel("Window Index")
-    ax2.set_ylabel("Score")
-    ax2.legend()
+    ax2.set_title("Score History", fontsize=10)
+    ax2.set_xlabel("Window Index", fontsize=8)
+    ax2.set_ylabel("Score", fontsize=8)
+    ax2.legend(fontsize=8)
     plot_placeholder.pyplot(fig2)
 
     st.session_state.start_idx = i + 1
