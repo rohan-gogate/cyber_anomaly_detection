@@ -22,7 +22,7 @@ df.drop(columns=CAT_FEATURES, inplace=True)
 df = pd.concat([df, encoded_df], axis=1)
 
 scaler = StandardScaler()
-df[NUM_FEATURES] = scaler.fit_transform(df[NUM_FEATURES])
+scaler.fit(df)
 joblib.dump(scaler, 'artifacts/scaler.joblib')
 
 df.to_csv('artifacts/preprocessed_training_data.csv', index=False)
