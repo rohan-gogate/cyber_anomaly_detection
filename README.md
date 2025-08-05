@@ -39,7 +39,7 @@ This project implements a **real-time anomaly detection system** for cybersecuri
 ## 🛠 Run Locally
 
 ```bash
-git clone https://github.com/your-username/cyber-anomaly-dashboard.git
+git clone https://github.com/rohan-gogate/cyber-anomaly-dashboard.git
 cd cyber-anomaly-dashboard
 pip install -r requirements.txt
 streamlit run dashboard.py
