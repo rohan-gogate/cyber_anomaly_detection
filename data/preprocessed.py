@@ -26,3 +26,4 @@ scaler.fit(df)
 joblib.dump(scaler, 'artifacts/scaler.joblib')
 
 df.to_csv('artifacts/preprocessed_training_data.csv', index=False)
+joblib.dump(df.columns.tolist(), 'artifacts/feature_columns.joblib')
