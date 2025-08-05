@@ -13,7 +13,7 @@ input_dim = 65
 st.set_page_config(layout="wide")
 
 
-st.title("🚨 Live Cybersecurity Anomaly Detection")
+st.title("Live Cybersecurity Anomaly Detection")
 
 @st.cache_resource
 def load_artifacts():
